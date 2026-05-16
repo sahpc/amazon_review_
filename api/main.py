@@ -29,14 +29,26 @@ app = FastAPI(
 # LOAD MODELS
 # =========================================================
 
-models = {
-    "logistic_regression": joblib.load(os.path.join(MODELS_PATH, "logistic_regression.pkl")),
-    "random_forest": joblib.load(os.path.join(MODELS_PATH, "random_forest.pkl")),
-    "xgboost": joblib.load(os.path.join(MODELS_PATH, "xgboost.pkl")),
-    "lightgbm": joblib.load(os.path.join(MODELS_PATH, "lightgbm.pkl")),
-    "catboost": joblib.load(os.path.join(MODELS_PATH, "catboost.pkl"))
-}
+models = {}
 
+@app.on_event("startup")
+def load_models():
+    global models
+
+    MODELS_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "models"
+    )
+
+    models = {
+        "logistic_regression": joblib.load(os.path.join(MODELS_PATH, "logistic_regression.pkl")),
+        "random_forest": joblib.load(os.path.join(MODELS_PATH, "random_forest.pkl")),
+        "xgboost": joblib.load(os.path.join(MODELS_PATH, "xgboost.pkl")),
+        "lightgbm": joblib.load(os.path.join(MODELS_PATH, "lightgbm.pkl")),
+        "catboost": joblib.load(os.path.join(MODELS_PATH, "catboost.pkl")),
+    }
+
+    print("✅ Models loaded:", list(models.keys()))
 # =========================================================
 # SCHEMAS
 # =========================================================
