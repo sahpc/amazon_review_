@@ -82,21 +82,82 @@ def health():
 @app.post("/predict")
 def predict(review: ReviewRequest):
 
+    # ==============================
+    # 1. VALIDAR MODELOS
+    # ==============================
     if not models:
-        raise HTTPException(503, "Models not loaded")
+        raise HTTPException(
+            status_code=503,
+            detail="Models not loaded. Check server logs."
+        )
 
-    features = extract_features(review.text, review.score)
-    X = pd.DataFrame([features])
+    if review.model_name not in models:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model '{review.model_name}' not available"
+        )
 
-    model = models[review.model_name]
-    prob = model.predict_proba(X)[0][1]
+    try:
+        # ==============================
+        # 2. FEATURE ENGINEERING
+        # ==============================
+        features = extract_features(review.text, review.score)
 
-    return {
-        "prediction": int(prob >= 0.5),
-        "probability": float(prob),
-        "model_used": review.model_name,
-        "features": features
-    }
+        if not features:
+            raise ValueError("Feature extraction returned empty result")
+
+        X = pd.DataFrame([features])
+
+        # ==============================
+        # 3. LOAD MODEL
+        # ==============================
+        model = models.get(review.model_name)
+
+        if model is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Model not found in memory"
+            )
+
+        # ==============================
+        # 4. PREDICTION SAFETY
+        # ==============================
+        if not hasattr(model, "predict_proba"):
+            raise HTTPException(
+                status_code=500,
+                detail="Model does not support predict_proba"
+            )
+
+        prob = model.predict_proba(X)
+
+        if prob is None or len(prob) == 0:
+            raise ValueError("Model returned invalid probability output")
+
+        probability = float(prob[0][1])
+        prediction = int(probability >= 0.5)
+
+        # ==============================
+        # 5. RESPONSE
+        # ==============================
+        return {
+            "prediction": prediction,
+            "probability": round(probability, 4),
+            "model_used": review.model_name,
+            "features_count": len(features),
+            "status": "success"
+        }
+
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Data error: {str(ve)}"
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal prediction error: {str(e)}"
+        )
 
 # =========================================================
 # LOCAL RUN
