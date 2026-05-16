@@ -10,6 +10,7 @@ joblib
 pydantic
 nltk
 textblob
+streamlit
+plotly
+requests
 vaderSentiment
-python-multipart
-
