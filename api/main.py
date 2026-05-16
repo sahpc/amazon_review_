@@ -1,15 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, Any
+from typing import Literal
 import pandas as pd
 import joblib
-import json
 import os
 
 from utils.features import extract_features
 
 # =========================================================
-# BASE PATH (RENDER SAFE)
+# PATH BASE
 # =========================================================
 
 BASE_DIR = os.path.dirname(__file__)
@@ -21,12 +20,11 @@ MODELS_PATH = os.path.join(BASE_DIR, "..", "models")
 
 app = FastAPI(
     title="Amazon Review Intelligence API",
-    description="API NLP + ML para análisis de reseñas Amazon",
     version="1.0.0"
 )
 
 # =========================================================
-# MODELS (GLOBAL)
+# MODELS
 # =========================================================
 
 models = {}
@@ -84,33 +82,24 @@ def health():
 @app.post("/predict")
 def predict(review: ReviewRequest):
 
-    try:
+    if not models:
+        raise HTTPException(503, "Models not loaded")
 
-        if not models:
-            raise HTTPException(
-                status_code=503,
-                detail="Models not loaded"
-            )
+    features = extract_features(review.text, review.score)
+    X = pd.DataFrame([features])
 
-        features = extract_features(review.text, review.score)
-        X = pd.DataFrame([features])
+    model = models[review.model_name]
+    prob = model.predict_proba(X)[0][1]
 
-        model = models[review.model_name]
-        prob = model.predict_proba(X)[0][1]
-
-        return {
-            "prediction": int(prob >= 0.5),
-            "probability": float(prob),
-            "model_used": review.model_name,
-            "features": features
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+    return {
+        "prediction": int(prob >= 0.5),
+        "probability": float(prob),
+        "model_used": review.model_name,
+        "features": features
+    }
 
 # =========================================================
-# MAIN LOCAL RUN (OPTIONAL)
+# LOCAL RUN
 # =========================================================
 
 if __name__ == "__main__":
