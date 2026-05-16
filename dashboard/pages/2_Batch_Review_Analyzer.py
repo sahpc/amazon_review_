@@ -13,8 +13,8 @@ from datetime import datetime
 # CONFIG
 # =====================================================
 
-API_URL = "http://127.0.0.1:8000"
-
+#API_URL = "http://127.0.0.1:8000"
+API_URL = "https://amazon-review-zsqc.onrender.com"
 st.set_page_config(
     page_title="Batch Review Analyzer",
     page_icon="📊",
