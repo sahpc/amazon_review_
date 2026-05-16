@@ -20,8 +20,8 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
-
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://amazon-review-zsqc.onrender.com"
+#API_URL = "http://127.0.0.1:8000"
 
 # =========================================================
 # SESSION STATE
