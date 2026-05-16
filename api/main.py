@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, Any, List
+from typing import Literal, Dict, Any
 import pandas as pd
 import joblib
 import json
@@ -9,14 +9,14 @@ import os
 from utils.features import extract_features
 
 # =========================================================
-# BASE DIR (IMPORTANTE PARA RENDER)
+# BASE PATH (RENDER SAFE)
 # =========================================================
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-MODELS_PATH = os.path.join(BASE_DIR, "models")
+BASE_DIR = os.path.dirname(__file__)
+MODELS_PATH = os.path.join(BASE_DIR, "..", "models")
 
 # =========================================================
-# FASTAPI APP
+# APP
 # =========================================================
 
 app = FastAPI(
@@ -26,7 +26,7 @@ app = FastAPI(
 )
 
 # =========================================================
-# LOAD MODELS
+# MODELS (GLOBAL)
 # =========================================================
 
 models = {}
@@ -35,22 +35,23 @@ models = {}
 def load_models():
     global models
 
-    MODELS_PATH = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "models"
-    )
+    try:
+        models = {
+            "logistic_regression": joblib.load(os.path.join(MODELS_PATH, "logistic_regression.pkl")),
+            "random_forest": joblib.load(os.path.join(MODELS_PATH, "random_forest.pkl")),
+            "xgboost": joblib.load(os.path.join(MODELS_PATH, "xgboost.pkl")),
+            "lightgbm": joblib.load(os.path.join(MODELS_PATH, "lightgbm.pkl")),
+            "catboost": joblib.load(os.path.join(MODELS_PATH, "catboost.pkl")),
+        }
 
-    models = {
-        "logistic_regression": joblib.load(os.path.join(MODELS_PATH, "logistic_regression.pkl")),
-        "random_forest": joblib.load(os.path.join(MODELS_PATH, "random_forest.pkl")),
-        "xgboost": joblib.load(os.path.join(MODELS_PATH, "xgboost.pkl")),
-        "lightgbm": joblib.load(os.path.join(MODELS_PATH, "lightgbm.pkl")),
-        "catboost": joblib.load(os.path.join(MODELS_PATH, "catboost.pkl")),
-    }
+        print("✅ Models loaded:", list(models.keys()))
 
-    print("✅ Models loaded:", list(models.keys()))
+    except Exception as e:
+        print("❌ Error loading models:", str(e))
+        models = {}
+
 # =========================================================
-# SCHEMAS
+# SCHEMA
 # =========================================================
 
 class ReviewRequest(BaseModel):
@@ -80,14 +81,17 @@ def health():
         "models_loaded": len(models)
     }
 
-# =========================================================
-# PREDICTION
-# =========================================================
-
 @app.post("/predict")
 def predict(review: ReviewRequest):
 
     try:
+
+        if not models:
+            raise HTTPException(
+                status_code=503,
+                detail="Models not loaded"
+            )
+
         features = extract_features(review.text, review.score)
         X = pd.DataFrame([features])
 
@@ -103,3 +107,12 @@ def predict(review: ReviewRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================================
+# MAIN LOCAL RUN (OPTIONAL)
+# =========================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000)
