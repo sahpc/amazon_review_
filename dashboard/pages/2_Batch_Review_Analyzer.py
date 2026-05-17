@@ -8,13 +8,12 @@ import pandas as pd
 import requests
 import plotly.express as px
 from datetime import datetime
+from pathlib import Path
 
 # =====================================================
-# CONFIG
+# PAGE CONFIG
 # =====================================================
 
-#API_URL = "http://127.0.0.1:8000"
-API_URL = "https://amazon-review-zsqc.onrender.com"
 st.set_page_config(
     page_title="Batch Review Analyzer",
     page_icon="📊",
@@ -22,15 +21,57 @@ st.set_page_config(
 )
 
 # =====================================================
-# PROFESSIONAL CSS
+# PATHS
+# =====================================================
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+logo_path = BASE_DIR / "assets" / "logo.png"
+
+# =====================================================
+# SIDEBAR
+# =====================================================
+
+with st.sidebar:
+
+    try:
+
+       st.image(
+        "assets/logo.png",
+        width=220
+    )
+
+
+    except:
+        pass
+
+    st.markdown("# UNIANDES")
+
+    st.markdown("---")
+
+    st.subheader("Proyecto")
+
+    st.markdown("""
+Plataforma Inteligente de Analítica de Reseñas basada en:
+
+- NLP
+- Machine Learning
+- Detección de Spam
+- Analítica Empresarial
+""")
+
+# =====================================================
+# CONFIG
+# =====================================================
+
+API_URL = "http://127.0.0.1:8000"
+
+# =====================================================
+# CSS
 # =====================================================
 
 st.markdown("""
 <style>
-
-/* =====================================================
-   GLOBAL
-===================================================== */
 
 .stApp {
     background-color: #F8FAFC;
@@ -41,19 +82,11 @@ html, body, [class*="css"] {
     color: #0F172A;
 }
 
-/* =====================================================
-   MAIN CONTAINER
-===================================================== */
-
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
     max-width: 1450px;
 }
-
-/* =====================================================
-   TITLES
-===================================================== */
 
 h1 {
     font-size: 2.8rem !important;
@@ -65,10 +98,6 @@ h2, h3 {
     color: #1E293B;
     font-weight: 600;
 }
-
-/* =====================================================
-   BUTTONS
-===================================================== */
 
 .stButton > button {
     background-color: #2563EB;
@@ -83,10 +112,6 @@ h2, h3 {
     background-color: #1D4ED8;
 }
 
-/* =====================================================
-   METRICS
-===================================================== */
-
 [data-testid="metric-container"] {
     background: white;
     border: 1px solid #E2E8F0;
@@ -95,40 +120,15 @@ h2, h3 {
     box-shadow: 0px 1px 3px rgba(15,23,42,0.05);
 }
 
-/* =====================================================
-   CARDS
-===================================================== */
-
-.card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 18px;
-    border: 1px solid #E2E8F0;
-    margin-bottom: 1rem;
-    box-shadow: 0px 1px 3px rgba(15,23,42,0.04);
-}
-
-/* =====================================================
-   DATAFRAME
-===================================================== */
-
 [data-testid="stDataFrame"] {
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid #E2E8F0;
 }
 
-/* =====================================================
-   ALERTS
-===================================================== */
-
 .stAlert {
     border-radius: 14px;
 }
-
-/* =====================================================
-   UPLOAD
-===================================================== */
 
 section[data-testid="stFileUploader"] {
     background: white;
@@ -136,10 +136,6 @@ section[data-testid="stFileUploader"] {
     border-radius: 18px;
     padding: 1rem;
 }
-
-/* =====================================================
-   PLOTLY
-===================================================== */
 
 .js-plotly-plot {
     background: white;
@@ -160,7 +156,7 @@ Batch Review Analyzer
 </h1>
 
 <p style='font-size:18px;color:#475569;'>
-Enterprise AI Batch Processing for Customer Review Intelligence
+Procesamiento Inteligente Masivo de Reseñas con IA
 </p>
 """, unsafe_allow_html=True)
 
@@ -173,39 +169,44 @@ st.markdown("<br>", unsafe_allow_html=True)
 with st.container(border=True):
 
     st.markdown("""
-### Platform Capabilities
+### Capacidades Inteligentes de la Plataforma
 
-This module enables large-scale AI analysis for customer reviews using:
-
-- NLP Analytics
-- Multi-Model Machine Learning
-- Sentiment Analysis
-- Spam Detection
-- Explainable AI
-- Review Quality Scoring
-- Batch Intelligence Processing
+- Análisis NLP de reseñas
+- Evaluación automática de calidad
+- Detección de spam y fraude
+- Análisis de sentimiento
+- Machine Learning predictivo
+- Procesamiento masivo automatizado
 """)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
-# FILE UPLOAD
+# FILE UPLOADER
 # =====================================================
 
 uploaded_file = st.file_uploader(
-    "Upload Reviews CSV",
+    "Subir archivo CSV de reseñas",
     type=["csv"]
 )
 
 # =====================================================
-# PROCESS
+# MAIN PROCESS
 # =====================================================
 
 if uploaded_file:
 
-    df = pd.read_csv(uploaded_file)
+    try:
 
-    st.subheader("Dataset Preview")
+        df = pd.read_csv(uploaded_file)
+
+    except Exception as e:
+
+        st.error(f"Error leyendo CSV: {e}")
+
+        st.stop()
+
+    st.subheader("Vista Previa del Dataset")
 
     st.dataframe(
         df.head(),
@@ -213,7 +214,7 @@ if uploaded_file:
     )
 
     # =====================================================
-    # AUTO DETECTION
+    # AUTO DETECT COLUMNS
     # =====================================================
 
     possible_review_cols = [
@@ -247,7 +248,7 @@ if uploaded_file:
     if review_col is None:
 
         st.error(
-            "No review column detected."
+            "No se detectó columna de reseñas."
         )
 
         st.stop()
@@ -255,27 +256,27 @@ if uploaded_file:
     if score_col is None:
 
         st.error(
-            "No score column detected."
+            "No se detectó columna de puntuación."
         )
 
         st.stop()
 
     st.success(f"""
-Review Column Detected: {review_col}
+Columna de Reseñas: {review_col}
 
-Score Column Detected: {score_col}
+Columna de Rating: {score_col}
 """)
 
     # =====================================================
-    # MODEL
+    # MODEL SELECT
     # =====================================================
 
     model_name = st.selectbox(
 
-        "Select AI Model",
+        "Seleccionar Modelo IA",
 
         [
-            "random_forest",
+            
             "xgboost",
             "lightgbm",
             "catboost",
@@ -290,7 +291,7 @@ Score Column Detected: {score_col}
     # =====================================================
 
     if st.button(
-        "Analyze Batch Reviews",
+        "Analizar Reseñas",
         use_container_width=True
     ):
 
@@ -301,9 +302,9 @@ Score Column Detected: {score_col}
 
         total = len(df)
 
-        # =================================================
-        # PROCESS LOOP
-        # =================================================
+        # =====================================================
+        # LOOP
+        # =====================================================
 
         for idx, row in df.iterrows():
 
@@ -326,96 +327,149 @@ Score Column Detected: {score_col}
                     "model_name": model_name
                 }
 
+                # =================================================
+                # API REQUEST
+                # =================================================
+
                 response = requests.post(
 
-                    f"{API_URL}/reviews/predict_helpfulness",
+                    f"{API_URL}/predict",
 
-                    json=payload
+                    json=payload,
+
+                    timeout=30
                 )
 
-                data = response.json()
+                # =================================================
+                # STATUS VALIDATION
+                # =================================================
+
+                if response.status_code != 200:
+
+                    raise Exception(
+                        f"""
+API Error {response.status_code}
+
+{response.text}
+"""
+                    )
+
+                # =================================================
+                # JSON VALIDATION
+                # =================================================
+
+                try:
+
+                    data = response.json()
+
+                except Exception:
+
+                    raise Exception(
+                        "Invalid JSON response from API"
+                    )
+
+                # =================================================
+                # PROBABILITY
+                # =================================================
 
                 probability = (
-                    data[
-                        'probability_helpful'
-                    ] * 100
+                    data.get(
+                        'probability_helpful',
+                        0
+                    ) * 100
                 )
 
-                features = data['features']
+                # =================================================
+                # FEATURES
+                # =================================================
 
-                # =========================================
-                # QUALITY
-                # =========================================
+                features = data.get(
+                    'features',
+                    {}
+                )
+
+                # =================================================
+                # QUALITY SCORE
+                # =================================================
 
                 if probability >= 85:
 
-                    quality = "Excellent"
+                    quality = "Excelente"
 
                 elif probability >= 70:
 
-                    quality = "Good"
+                    quality = "Buena"
 
                 elif probability >= 50:
 
-                    quality = "Average"
+                    quality = "Regular"
 
                 else:
 
-                    quality = "Low"
+                    quality = "Baja"
 
-                # =========================================
+                # =================================================
                 # SPAM DETECTION
-                # =========================================
+                # =================================================
 
                 spam_flag = False
 
                 if (
-                    features['uppercase_ratio']
-                    > 0.10
+                    features.get(
+                        'uppercase_ratio',
+                        0
+                    ) > 0.10
                 ):
 
                     spam_flag = True
 
                 if (
-                    features['word_count']
-                    < 5
+                    features.get(
+                        'word_count',
+                        0
+                    ) < 5
                 ):
 
                     spam_flag = True
 
-                # =========================================
+                # =================================================
                 # NLP SCORE
-                # =========================================
+                # =================================================
 
                 nlp_score = 50
 
                 if (
-                    features['word_count']
-                    > 50
+                    features.get(
+                        'word_count',
+                        0
+                    ) > 50
                 ):
 
                     nlp_score += 20
 
                 if (
                     abs(
-                        features[
-                            'sentiment_compound'
-                        ]
+                        features.get(
+                            'sentiment_compound',
+                            0
+                        )
                     ) > 0.5
                 ):
 
                     nlp_score += 15
 
                 if (
-                    features['coherence']
-                    == 1
+                    features.get(
+                        'coherence',
+                        0
+                    ) == 1
                 ):
 
                     nlp_score += 15
 
-                # =========================================
+                # =================================================
                 # SAVE RESULTS
-                # =========================================
+                # =================================================
 
                 results.append({
 
@@ -433,16 +487,18 @@ Score Column Detected: {score_col}
 
                     "sentiment":
                         round(
-                            features[
-                                'sentiment_compound'
-                            ],
+                            features.get(
+                                'sentiment_compound',
+                                0
+                            ),
                             3
                         ),
 
                     "word_count":
-                        features[
-                            'word_count'
-                        ],
+                        features.get(
+                            'word_count',
+                            0
+                        ),
 
                     "spam":
                         spam_flag,
@@ -465,10 +521,37 @@ Score Column Detected: {score_col}
             )
 
         # =====================================================
-        # RESULTS DATAFRAME
+        # RESULTS DF
         # =====================================================
 
         results_df = pd.DataFrame(results)
+
+        # =====================================================
+        # EMPTY VALIDATION
+        # =====================================================
+
+        if results_df.empty:
+
+            st.error(
+                "No se pudieron procesar reseñas válidas."
+            )
+
+            if errors:
+
+                st.subheader(
+                    "Errores de Procesamiento"
+                )
+
+                error_df = pd.DataFrame(errors)
+
+                st.dataframe(
+                    error_df,
+                    use_container_width=True
+                )
+
+                st.write(error_df)
+
+            st.stop()
 
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -544,7 +627,7 @@ Score Column Detected: {score_col}
         # RESULTS TABLE
         # =====================================================
 
-        st.subheader("Batch Analysis Results")
+        st.subheader("Resultados del Análisis")
 
         st.dataframe(
             results_df,
@@ -554,11 +637,11 @@ Score Column Detected: {score_col}
         st.markdown("<br>", unsafe_allow_html=True)
 
         # =====================================================
-        # HELPFULNESS DISTRIBUTION
+        # HISTOGRAM
         # =====================================================
 
         st.subheader(
-            "Helpfulness Distribution"
+            "Distribución de Helpfulness"
         )
 
         fig = px.histogram(
@@ -575,152 +658,13 @@ Score Column Detected: {score_col}
         fig.update_layout(
 
             plot_bgcolor="white",
-            paper_bgcolor="white",
-
-            font=dict(
-                family="Inter",
-                size=14,
-                color="#0F172A"
-            ),
-
-            margin=dict(
-                l=20,
-                r=20,
-                t=30,
-                b=20
-            )
+            paper_bgcolor="white"
         )
 
         st.plotly_chart(
             fig,
             use_container_width=True
         )
-
-        # =====================================================
-        # QUALITY DISTRIBUTION
-        # =====================================================
-
-        st.subheader(
-            "Quality Distribution"
-        )
-
-        quality_counts = (
-            results_df[
-                'quality'
-            ].value_counts()
-        )
-
-        fig2 = px.pie(
-
-            names=quality_counts.index,
-
-            values=quality_counts.values
-        )
-
-        fig2.update_layout(
-
-            paper_bgcolor="white",
-
-            font=dict(
-                family="Inter",
-                size=14,
-                color="#0F172A"
-            )
-        )
-
-        st.plotly_chart(
-            fig2,
-            use_container_width=True
-        )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # =====================================================
-        # TOP REVIEWS
-        # =====================================================
-
-        st.subheader(
-            "Top Useful Reviews"
-        )
-
-        top_reviews = results_df.sort_values(
-            by="helpfulness",
-            ascending=False
-        ).head(5)
-
-        st.dataframe(
-            top_reviews,
-            use_container_width=True
-        )
-
-        # =====================================================
-        # LOW QUALITY REVIEWS
-        # =====================================================
-
-        st.subheader(
-            "Low Quality Reviews"
-        )
-
-        low_reviews = results_df.sort_values(
-            by="helpfulness",
-            ascending=True
-        ).head(5)
-
-        st.dataframe(
-            low_reviews,
-            use_container_width=True
-        )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # =====================================================
-        # EXECUTIVE INSIGHTS
-        # =====================================================
-
-        st.subheader(
-            "Executive AI Insights"
-        )
-
-        if avg_helpfulness >= 80:
-
-            st.success(
-                "Dataset contains high-quality customer feedback."
-            )
-
-        else:
-
-            st.warning(
-                "Large volume of low-value reviews detected."
-            )
-
-        if spam_pct > 20:
-
-            st.error(
-                "High spam probability detected in uploaded dataset."
-            )
-
-        else:
-
-            st.success(
-                "Spam levels appear controlled."
-            )
-
-        # =====================================================
-        # ERRORS
-        # =====================================================
-
-        if errors:
-
-            st.subheader(
-                "Processing Errors"
-            )
-
-            st.dataframe(
-                pd.DataFrame(errors),
-                use_container_width=True
-            )
-
-        st.markdown("<br>", unsafe_allow_html=True)
 
         # =====================================================
         # DOWNLOAD
@@ -732,7 +676,7 @@ Score Column Detected: {score_col}
 
         st.download_button(
 
-            "Download Analysis CSV",
+            "Descargar CSV Analizado",
 
             csv,
 
