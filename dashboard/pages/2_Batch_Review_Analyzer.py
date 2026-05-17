@@ -130,11 +130,26 @@ h2, h3 {
     border-radius: 14px;
 }
 
-section[data-testid="stFileUploader"] {
-    background: white;
-    border: 2px dashed #CBD5E1;
-    border-radius: 18px;
-    padding: 1rem;
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0B1220 0%, #0F1B33 100%);
+    border-right: 1px solid #1E293B;
+}
+
+/* Texto del sidebar */
+section[data-testid="stSidebar"] * {
+    color: #E2E8F0 !important;
+}
+
+/* Títulos del sidebar */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #FFFFFF !important;
+}
+
+/* Divider */
+section[data-testid="stSidebar"] hr {
+    border-color: #1E3A8A;
 }
 
 .js-plotly-plot {
