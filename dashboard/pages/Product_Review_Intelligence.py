@@ -20,13 +20,23 @@ st.set_page_config(
     layout="wide"
 )
 
+with st.sidebar:
+    try:
+        st.image(
+            "assets/logo.png",
+            width=220
+        )
+    except:
+        pass
+
+    st.markdown("# UNIANDES")
+    st.markdown("---")
 # =====================================================
 # CSS
 # =====================================================
 
 st.markdown("""
 <style>
-
 .stApp {
     background-color: #F8FAFC;
 }
@@ -53,22 +63,26 @@ h2, h3 {
     font-weight: 600;
 }
 
-textarea, input {
-    border-radius: 14px !important;
-    border: 1px solid #CBD5E1 !important;
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #0B1220 0%, #0F1B33 100%);
+    border-right: 1px solid #1E293B;
 }
 
-.stButton > button {
-    background-color: #2563EB;
-    color: white;
-    border-radius: 12px;
-    border: none;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
+/* Texto del sidebar */
+section[data-testid="stSidebar"] * {
+    color: #E2E8F0 !important;
 }
 
-.stButton > button:hover {
-    background-color: #1D4ED8;
+/* Títulos del sidebar */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #FFFFFF !important;
+}
+
+/* Divider */
+section[data-testid="stSidebar"] hr {
+    border-color: #1E3A8A;
 }
 
 [data-testid="metric-container"] {
@@ -76,26 +90,54 @@ textarea, input {
     border: 1px solid #E2E8F0;
     padding: 1.2rem;
     border-radius: 18px;
-    box-shadow: 0px 1px 3px rgba(15,23,42,0.05);
+    box-shadow: 0px 1px 3px rgba(15,23,42,0.04);
 }
 
 .insight-box {
     background: white;
     border: 1px solid #E2E8F0;
-    border-left: 5px solid #2563EB;
-    border-radius: 14px;
     padding: 1rem;
-    margin-bottom: 12px;
+    border-radius: 14px;
+    margin-bottom: 10px;
 }
 
-[data-testid="stDataFrame"] {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #E2E8F0;
+.stButton > button {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 12px;
+    border: none;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+}
+
+.stButton > button:hover {
+    background-color: #1D4ED8;
+}
+
+textarea {
+    border-radius: 14px !important;
+    border: 1px solid #CBD5E1 !important;
 }
 
 .stAlert {
     border-radius: 14px;
+}
+
+/* =========================================================
+   MODIFICACIÓN: DROPDOWN CON FONDO ROJO
+   ========================================================= */
+div[data-baseweb="popover"] ul {
+    background-color: #FF0000 !important;
+}
+
+div[data-baseweb="popover"] li {
+    background-color: #FF0000 !important;
+    color: #FFFFFF !important;
+}
+
+div[data-baseweb="popover"] li:hover {
+    background-color: #CC0000 !important;
+    color: #FFFFFF !important;
 }
 
 </style>
