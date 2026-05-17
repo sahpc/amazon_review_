@@ -1,21 +1,38 @@
-import streamlit as st
-import requests
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-
 # =====================================================
 # PAGE CONFIG
 # =====================================================
 
-st.set_page_config(
-    page_title="ReviewIQ Platform",
-    page_icon="📊",
-    layout="wide"
-)
 
-#API_URL = "http://127.0.0.1:8000"
-API_URL = "https://amazon-review-zsqc.onrender.com/"
+with st.sidebar:
+
+    st.image(
+        "assets/logo.png",
+        width=220
+    )
+
+    st.markdown("# UNIANDES")
+
+  
+
+    st.markdown("---")
+
+    st.subheader("Equipo de Desarrollo")
+
+    st.info("""
+ Byron Fabricio Torres Apolo  
+
+
+ Monica Cholango
+
+
+ Jose Arevalo
+
+""")
+
+    st.markdown("---")
+
+    st.success("Sistema operativo y API conectada")
+API_URL = "http://127.0.0.1:8000"
 
 # =====================================================
 # PROFESSIONAL CSS
@@ -141,12 +158,9 @@ hr {
 
 st.markdown("""
 <h1>
-ReviewIQ Platform
+Plataforma Analitica de Reseñas
 </h1>
 
-<p style='font-size:18px; color:#475569; margin-bottom:30px;'>
-Enterprise NLP & Machine Learning Analytics Platform
-</p>
 """, unsafe_allow_html=True)
 
 # =====================================================
@@ -156,16 +170,16 @@ Enterprise NLP & Machine Learning Analytics Platform
 with st.container(border=True):
 
     st.markdown("""
-### Platform Capabilities
+### Capacidades Inteligentes de la Plataforma
 
-ReviewIQ enables organizations to:
+ReviewIQ ayuda a las empresas a:
 
-- Detect high-quality reviews
-- Automatically identify spam content
-- Analyze customer sentiment
-- Generate business intelligence insights
-- Deploy explainable AI models
-- Benchmark multiple ML algorithms
+- Evaluar la calidad de las reseñas de clientes
+- Detectar reseñas falsas, spam o contenido sospechoso
+- Comprender la percepción y satisfacción del cliente
+- Obtener información estratégica basada en datos
+- Comparar el rendimiento de diferentes modelos predictivos
+
 """)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -255,133 +269,26 @@ with col4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
-# AI CAPABILITIES
-# =====================================================
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    with st.container(border=True):
-
-        st.subheader("AI Features")
-
-        st.markdown("""
-- NLP Feature Engineering  
-- Sentiment Analysis  
-- Explainable AI  
-- Spam Detection  
-- Review Quality Scoring  
-- Batch Processing  
-""")
-
-with col2:
-
-    with st.container(border=True):
-
-        st.subheader("Supported Models")
-
-        st.markdown("""
-- Random Forest  
-- XGBoost  
-- LightGBM  
-- CatBoost  
-- Ensemble Learning  
-- Scikit-Learn Pipeline  
-""")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# =====================================================
-# BUSINESS VALUE
+# Modelos  ML Soportados
 # =====================================================
 
 with st.container(border=True):
 
-    st.subheader("Business Value")
+    st.subheader("Modelos de Machine Learning Soportados")
 
     st.markdown("""
-### Executive Benefits
-
-- Improve customer trust
-- Reduce spam and fake reviews
-- Enhance marketplace credibility
-- Automate moderation processes
-- Improve recommendation systems
-- Generate actionable analytics
+- Random Forest  
+- XGBoost  
+- LightGBM  
+- CatBoost  
+- Modelos Ensemble  
+- Pipelines Scikit-Learn  
 """)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
-# MODEL PERFORMANCE
-# =====================================================
 
-st.subheader("AI Model Benchmark")
-
-try:
-
-    benchmark_df = metrics_df.sort_values(
-        by="f1_score",
-        ascending=False
-    )
-
-    fig = px.bar(
-
-        benchmark_df,
-
-        y="f1_score",
-
-        text="f1_score",
-
-        color="f1_score",
-
-        color_continuous_scale="Blues"
-    )
-
-    fig.update_traces(
-        texttemplate='%{text:.3f}',
-        textposition='outside'
-    )
-
-    fig.update_layout(
-
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-
-        font=dict(
-            family="Inter",
-            size=14,
-            color="#0F172A"
-        ),
-
-        title_font_size=20,
-
-        margin=dict(
-            l=20,
-            r=20,
-            t=30,
-            b=20
-        ),
-
-        coloraxis_showscale=False,
-
-        xaxis_title="Model",
-        yaxis_title="F1 Score"
-    )
-
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
-
-except:
-
-    st.warning(
-        "Model metrics currently unavailable."
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
 # SENTIMENT ANALYTICS
@@ -466,13 +373,12 @@ else:
 with st.container(border=True):
 
     st.markdown("""
-### Platform Architecture
+### Arquitectura de la Plataforma
 
-- REST API Infrastructure
-- Streamlit Analytics Dashboard
-- NLP Intelligence Engine
-- Explainable AI Module
-- Multi-Model Inference
-- Batch Processing Pipeline
-- Enterprise Analytics Layer
+- API REST para integración y servicios
+- Dashboard interactivo de análisis de datos
+- Motor de procesamiento de lenguaje natural (NLP)
+- Evaluación mediante múltiples modelos predictivos
+- Procesamiento masivo automatizado de reseñas
+
 """)
