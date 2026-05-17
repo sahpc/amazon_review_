@@ -6,7 +6,6 @@ Proyecto profesional de Machine Learning para predecir la utilidad de reseñas d
 ## Modelos implementados
 
 - Logistic Regression
-- Random Forest
 - XGBoost
 - LightGBM
 - CatBoost
@@ -56,5 +55,5 @@ uvicorn api.main:app --reload
 ## Ejecutar dashboard
 
 ```bash
-streamlit run dashboard/app.py
+streamlit run dashboard/Home.py
 ```
