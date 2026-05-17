@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import Literal
@@ -8,18 +9,27 @@ import os
 from utils.features import extract_features
 
 # =========================================================
-# PATH BASE
+# BASE PATH
 # =========================================================
 
-BASE_DIR = os.path.dirname(__file__)
-MODELS_PATH = os.path.join(BASE_DIR, "..", "models")
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+MODELS_PATH = os.path.join(
+    BASE_DIR,
+    "..",
+    "models"
+)
 
 # =========================================================
-# APP
+# FASTAPI APP
 # =========================================================
 
 app = FastAPI(
+
     title="Amazon Review Intelligence API",
+
     version="1.0.0"
 )
 
@@ -29,32 +39,99 @@ app = FastAPI(
 
 models = {}
 
-@app.on_event("startup")
-def load_models():
-    global models
+MODEL_FILES = {
 
-    try:
-        models = {
-            "logistic_regression": joblib.load(os.path.join(MODELS_PATH, "logistic_regression.pkl")),
-            "random_forest": joblib.load(os.path.join(MODELS_PATH, "random_forest.pkl")),
-            "xgboost": joblib.load(os.path.join(MODELS_PATH, "xgboost.pkl")),
-            "lightgbm": joblib.load(os.path.join(MODELS_PATH, "lightgbm.pkl")),
-            "catboost": joblib.load(os.path.join(MODELS_PATH, "catboost.pkl")),
-        }
+    "logistic_regression":
+        "logistic_regression.pkl",
 
-        print("✅ Models loaded:", list(models.keys()))
+    "random_forest":
+        "random_forest.pkl",
 
-    except Exception as e:
-        print("❌ Error loading models:", str(e))
-        models = {}
+    "xgboost":
+        "xgboost.pkl",
+
+    "lightgbm":
+        "lightgbm.pkl",
+
+    "catboost":
+        "catboost.pkl",
+}
 
 # =========================================================
-# SCHEMA
+# LOAD MODELS
+# =========================================================
+
+@app.on_event("startup")
+def load_models():
+
+    global models
+
+    print("\n==============================")
+    print("Loading ML models...")
+    print("==============================\n")
+
+    for model_name, filename in MODEL_FILES.items():
+
+        try:
+
+            model_path = os.path.join(
+                MODELS_PATH,
+                filename
+            )
+
+            # =============================================
+            # FILE VALIDATION
+            # =============================================
+
+            if not os.path.exists(model_path):
+
+                print(
+                    f"❌ File not found: {filename}"
+                )
+
+                continue
+
+            # =============================================
+            # LOAD MODEL
+            # =============================================
+
+            models[model_name] = joblib.load(
+                model_path
+            )
+
+            print(
+                f"✅ Loaded: {model_name}"
+            )
+
+        except Exception as e:
+
+            print(
+                f"❌ Error loading {model_name}: {e}"
+            )
+
+    print("\n==============================")
+    print(
+        f"Total models loaded: {len(models)}"
+    )
+    print("==============================\n")
+
+# =========================================================
+# REQUEST SCHEMA
 # =========================================================
 
 class ReviewRequest(BaseModel):
-    text: str = Field(..., min_length=10, max_length=5000)
-    score: int = Field(..., ge=1, le=5)
+
+    text: str = Field(
+        ...,
+        min_length=10,
+        max_length=5000
+    )
+
+    score: int = Field(
+        ...,
+        ge=1,
+        le=5
+    )
 
     model_name: Literal[
         "logistic_regression",
@@ -65,98 +142,136 @@ class ReviewRequest(BaseModel):
     ] = "random_forest"
 
 # =========================================================
-# ENDPOINTS
+# HOME
 # =========================================================
 
 @app.get("/")
 def home():
-    return {"message": "API running 🚀"}
+
+    return {
+
+        "message":
+            "Amazon Review Intelligence API Running 🚀"
+    }
+
+# =========================================================
+# HEALTH CHECK
+# =========================================================
 
 @app.get("/health")
 def health():
+
     return {
-        "status": "ok",
-        "models_loaded": len(models)
+
+        "status":
+            "ok",
+
+        "models_loaded":
+            len(models),
+
+        "available_models":
+            list(models.keys())
     }
+
+# =========================================================
+# PREDICT ENDPOINT
+# =========================================================
 
 @app.post("/predict")
 def predict(review: ReviewRequest):
 
-    # ==============================
-    # 1. VALIDAR MODELOS
-    # ==============================
+    # =====================================================
+    # MODELS VALIDATION
+    # =====================================================
+
     if not models:
+
         raise HTTPException(
+
             status_code=503,
-            detail="Models not loaded. Check server logs."
+
+            detail="Models not loaded"
         )
 
+    # =====================================================
+    # MODEL VALIDATION
+    # =====================================================
+
     if review.model_name not in models:
+
         raise HTTPException(
-            status_code=400,
-            detail=f"Model '{review.model_name}' not available"
+
+            status_code=404,
+
+            detail=f"""
+Model '{review.model_name}' not available
+"""
         )
 
     try:
-        # ==============================
-        # 2. FEATURE ENGINEERING
-        # ==============================
-        features = extract_features(review.text, review.score)
 
-        if not features:
-            raise ValueError("Feature extraction returned empty result")
+        # =================================================
+        # FEATURE EXTRACTION
+        # =================================================
+
+        features = extract_features(
+
+            review.text,
+
+            review.score
+        )
+
+        # =================================================
+        # DATAFRAME
+        # =================================================
 
         X = pd.DataFrame([features])
 
-        # ==============================
-        # 3. LOAD MODEL
-        # ==============================
-        model = models.get(review.model_name)
+        # =================================================
+        # MODEL
+        # =================================================
 
-        if model is None:
-            raise HTTPException(
-                status_code=500,
-                detail="Model not found in memory"
-            )
+        model = models[
+            review.model_name
+        ]
 
-        # ==============================
-        # 4. PREDICTION SAFETY
-        # ==============================
-        if not hasattr(model, "predict_proba"):
-            raise HTTPException(
-                status_code=500,
-                detail="Model does not support predict_proba"
-            )
+        # =================================================
+        # PREDICTION
+        # =================================================
 
-        prob = model.predict_proba(X)
+        prob = model.predict_proba(X)[0][1]
 
-        if prob is None or len(prob) == 0:
-            raise ValueError("Model returned invalid probability output")
+        prediction = int(prob >= 0.5)
 
-        probability = float(prob[0][1])
-        prediction = int(probability >= 0.5)
+        # =================================================
+        # RESPONSE
+        # =================================================
 
-        # ==============================
-        # 5. RESPONSE
-        # ==============================
         return {
-            "prediction": prediction,
-            "probability": round(probability, 4),
-            "model_used": review.model_name,
-            "features_count": len(features),
-            "status": "success"
+
+            "prediction":
+                prediction,
+
+            "probability":
+                round(float(prob), 4),
+
+            "model_used":
+                review.model_name,
+
+            "features":
+                features
         }
 
-    except ValueError as ve:
-        raise HTTPException(
-            status_code=422,
-            detail=f"Data error: {str(ve)}"
-        )
-
     except Exception as e:
+
         raise HTTPException(
+
             status_code=500,
-            detail=f"Internal prediction error: {str(e)}"
+
+            detail=f"""
+Prediction error:
+{str(e)}
+"""
         )
 
 # =========================================================
@@ -164,5 +279,16 @@ def predict(review: ReviewRequest):
 # =========================================================
 
 if __name__ == "__main__":
+
     import uvicorn
-    uvicorn.run("api.main:app", host="0.0.0.0", port=8000)
+
+    uvicorn.run(
+
+        "api.main:app",
+
+        host="0.0.0.0",
+
+        port=8000,
+
+        reload=True
+    )
