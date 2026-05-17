@@ -12,8 +12,8 @@ import re
 # CONFIG
 # =====================================================
 
-#API_URL = "http://127.0.0.1:8000"
-API_URL = "https://amazon-review-zsqc.onrender.com"
+API_URL = "http://127.0.0.1:8000"
+
 st.set_page_config(
     page_title="Product Intelligence",
     page_icon="📊",
@@ -21,15 +21,11 @@ st.set_page_config(
 )
 
 # =====================================================
-# PROFESSIONAL CSS
+# CSS
 # =====================================================
 
 st.markdown("""
 <style>
-
-/* =====================================================
-   GLOBAL
-===================================================== */
 
 .stApp {
     background-color: #F8FAFC;
@@ -40,19 +36,11 @@ html, body, [class*="css"] {
     color: #0F172A;
 }
 
-/* =====================================================
-   CONTAINER
-===================================================== */
-
 .block-container {
     padding-top: 2rem;
     padding-bottom: 2rem;
     max-width: 1450px;
 }
-
-/* =====================================================
-   TITLES
-===================================================== */
 
 h1 {
     font-size: 2.8rem !important;
@@ -65,18 +53,10 @@ h2, h3 {
     font-weight: 600;
 }
 
-/* =====================================================
-   INPUTS
-===================================================== */
-
 textarea, input {
     border-radius: 14px !important;
     border: 1px solid #CBD5E1 !important;
 }
-
-/* =====================================================
-   BUTTON
-===================================================== */
 
 .stButton > button {
     background-color: #2563EB;
@@ -91,10 +71,6 @@ textarea, input {
     background-color: #1D4ED8;
 }
 
-/* =====================================================
-   METRICS
-===================================================== */
-
 [data-testid="metric-container"] {
     background: white;
     border: 1px solid #E2E8F0;
@@ -102,22 +78,6 @@ textarea, input {
     border-radius: 18px;
     box-shadow: 0px 1px 3px rgba(15,23,42,0.05);
 }
-
-/* =====================================================
-   CARDS
-===================================================== */
-
-.custom-card {
-    background: white;
-    border: 1px solid #E2E8F0;
-    padding: 1.5rem;
-    border-radius: 18px;
-    margin-bottom: 1rem;
-}
-
-/* =====================================================
-   INSIGHTS
-===================================================== */
 
 .insight-box {
     background: white;
@@ -128,50 +88,11 @@ textarea, input {
     margin-bottom: 12px;
 }
 
-/* =====================================================
-   STATUS BOXES
-===================================================== */
-
-.good-box {
-    background: #ECFDF5;
-    border: 1px solid #BBF7D0;
-    border-left: 5px solid #22C55E;
-    padding: 1rem;
-    border-radius: 14px;
-    margin-bottom: 12px;
-}
-
-.warning-box {
-    background: #FEFCE8;
-    border: 1px solid #FDE68A;
-    border-left: 5px solid #F59E0B;
-    padding: 1rem;
-    border-radius: 14px;
-    margin-bottom: 12px;
-}
-
-.bad-box {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    border-left: 5px solid #EF4444;
-    padding: 1rem;
-    border-radius: 14px;
-    margin-bottom: 12px;
-}
-
-/* =====================================================
-   DATAFRAME
-===================================================== */
-
 [data-testid="stDataFrame"] {
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid #E2E8F0;
 }
-
-/* =====================================================
-   ALERTS
-===================================================== */
 
 .stAlert {
     border-radius: 14px;
@@ -179,6 +100,39 @@ textarea, input {
 
 </style>
 """, unsafe_allow_html=True)
+
+# =====================================================
+# FUNCTIONS
+# =====================================================
+
+def review_quality(probability):
+
+    if probability >= 85:
+        return "Excellent"
+
+    elif probability >= 70:
+        return "Good"
+
+    elif probability >= 50:
+        return "Average"
+
+    return "Low"
+
+def sentiment_label(sentiment):
+
+    if sentiment >= 0.6:
+        return "Very Positive"
+
+    elif sentiment >= 0.2:
+        return "Positive"
+
+    elif sentiment <= -0.6:
+        return "Very Negative"
+
+    elif sentiment <= -0.2:
+        return "Negative"
+
+    return "Neutral"
 
 # =====================================================
 # HEADER
@@ -216,8 +170,6 @@ This platform enables organizations to:
 - Generate explainable AI analytics
 """)
 
-st.markdown("<br>", unsafe_allow_html=True)
-
 # =====================================================
 # INPUTS
 # =====================================================
@@ -229,8 +181,7 @@ col1, col2 = st.columns(2)
 with col1:
 
     product_name = st.text_input(
-        "Product Name",
-        placeholder="Organic Protein Snack Bar"
+        "Product Name"
     )
 
     category = st.selectbox(
@@ -250,8 +201,7 @@ with col1:
 with col2:
 
     brand = st.text_input(
-        "Brand",
-        placeholder="NatureFit"
+        "Brand"
     )
 
     score = st.slider(
@@ -261,20 +211,13 @@ with col2:
         5
     )
 
-st.markdown("<br>", unsafe_allow_html=True)
-
 # =====================================================
-# PRODUCT DESCRIPTION
+# DESCRIPTION
 # =====================================================
 
 product_description = st.text_area(
     "Product Description",
-    height=160,
-    placeholder="""
-Healthy organic protein snack made with natural ingredients,
-high fiber, gluten free, low sugar and premium packaging.
-Ideal for athletes and healthy lifestyles.
-"""
+    height=150
 )
 
 # =====================================================
@@ -283,13 +226,7 @@ Ideal for athletes and healthy lifestyles.
 
 review_text = st.text_area(
     "Customer Review",
-    height=220,
-    placeholder="""
-I have been using these protein bars for two weeks after workouts.
-The flavor tastes natural and not overly sweet.
-Packaging quality was excellent and ingredients feel premium.
-Very good option for healthy snacks.
-"""
+    height=220
 )
 
 # =====================================================
@@ -299,7 +236,6 @@ Very good option for healthy snacks.
 model_name = st.selectbox(
     "AI Model",
     [
-        "random_forest",
         "xgboost",
         "lightgbm",
         "catboost",
@@ -310,7 +246,7 @@ model_name = st.selectbox(
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================================
-# ANALYZE BUTTON
+# BUTTON
 # =====================================================
 
 if st.button(
@@ -324,24 +260,18 @@ if st.button(
 
     if not product_name.strip():
 
-        st.error(
-            "Product name is required."
-        )
-
+        st.error("Product name is required.")
         st.stop()
 
     if not review_text.strip():
 
-        st.error(
-            "Customer review is required."
-        )
-
+        st.error("Customer review is required.")
         st.stop()
 
     try:
 
         # =================================================
-        # API REQUEST
+        # PAYLOAD
         # =================================================
 
         payload = {
@@ -353,41 +283,73 @@ if st.button(
             "model_name": model_name
         }
 
+        # =================================================
+        # API REQUEST
+        # =================================================
+
         response = requests.post(
-            f"{API_URL}/reviews/predict_helpfulness",
+            f"{API_URL}/predict",
             json=payload
         )
 
+        # =================================================
+        # VALIDATE RESPONSE
+        # =================================================
+
+        if response.status_code != 200:
+
+            st.error(
+                f"API Error {response.status_code}: {response.text}"
+            )
+
+            st.stop()
+
         data = response.json()
 
+        # =================================================
+        # FIXED
+        # =================================================
+
         probability = (
-            data['probability_helpful'] * 100
+            data['probability'] * 100
         )
 
         features = data['features']
 
-        sentiment = (
-            features['sentiment_compound']
+        sentiment = features.get(
+            'sentiment_compound',
+            0
         )
 
-        word_count = features['word_count']
+        word_count = features.get(
+            'word_count',
+            0
+        )
+
+        uppercase_ratio = features.get(
+            'uppercase_ratio',
+            0
+        )
+
+        coherence = features.get(
+            'coherence',
+            1
+        )
 
         # =================================================
-        # NLP ADJUSTMENTS
+        # NLP ADJUSTMENT
         # =================================================
 
         if word_count < 20:
-
             probability *= 0.75
 
         elif word_count < 40:
-
             probability *= 0.90
 
         probability = min(probability, 100)
 
         # =================================================
-        # PRODUCT CONSISTENCY
+        # CONSISTENCY
         # =================================================
 
         desc_words = set(
@@ -409,19 +371,15 @@ if st.button(
         )
 
         if overlap >= 10:
-
             consistency_score = 95
 
         elif overlap >= 6:
-
             consistency_score = 80
 
         elif overlap >= 3:
-
             consistency_score = 65
 
         else:
-
             consistency_score = 40
 
         # =================================================
@@ -430,33 +388,23 @@ if st.button(
 
         spam_risk = "Low"
 
-        if features['uppercase_ratio'] > 0.10:
-
+        if uppercase_ratio > 0.10:
             spam_risk = "Medium"
 
-        if features['coherence'] == 0:
-
+        if coherence == 0:
             spam_risk = "High"
 
         # =================================================
         # QUALITY
         # =================================================
 
-        if probability >= 85:
+        quality = review_quality(probability)
 
-            quality = "Excellent"
+        # =================================================
+        # SENTIMENT
+        # =================================================
 
-        elif probability >= 70:
-
-            quality = "Good"
-
-        elif probability >= 50:
-
-            quality = "Average"
-
-        else:
-
-            quality = "Low"
+        sentiment_text = sentiment_label(sentiment)
 
         # =================================================
         # REVIEW CLASSIFICATION
@@ -467,7 +415,7 @@ if st.button(
         if (
             probability >= 90
             and consistency_score >= 80
-            and features['coherence'] == 1
+            and coherence == 1
         ):
 
             review_rank = "Excellent Review"
@@ -491,15 +439,13 @@ if st.button(
         marketplace_priority = "Low"
 
         if review_rank == "Excellent Review":
-
             marketplace_priority = "High"
 
         elif review_rank == "Good Review":
-
             marketplace_priority = "Medium"
 
         # =================================================
-        # EXECUTIVE SUMMARY
+        # METRICS
         # =================================================
 
         st.subheader("Executive AI Summary")
@@ -517,7 +463,7 @@ if st.button(
 
             st.metric(
                 "Sentiment",
-                round(sentiment, 2)
+                sentiment_text
             )
 
         with colC:
@@ -537,7 +483,7 @@ if st.button(
         st.markdown("<br>", unsafe_allow_html=True)
 
         # =================================================
-        # REVIEW CLASSIFICATION
+        # CLASSIFICATION
         # =================================================
 
         st.subheader("AI Review Classification")
@@ -558,8 +504,6 @@ if st.button(
 
             st.warning(review_rank)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
         # =================================================
         # PRODUCT INTELLIGENCE
         # =================================================
@@ -570,51 +514,39 @@ if st.button(
 
         with col1:
 
-            with st.container(border=True):
+            st.info(f"""
+Product: {product_name}
 
-                st.markdown(f"""
-### Product Metadata
+Brand: {brand}
 
-**Product:** {product_name}
-
-**Brand:** {brand}
-
-**Category:** {category}
+Category: {category}
 """)
 
         with col2:
 
-            with st.container(border=True):
+            st.info(f"""
+Consistency Score: {consistency_score}%
 
-                st.markdown(f"""
-### AI Metrics
+Word Count: {word_count}
 
-**Consistency Score:** {consistency_score}%
-
-**Word Count:** {word_count}
-
-**Marketplace Priority:** {marketplace_priority}
+Marketplace Priority: {marketplace_priority}
 """)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
         # =================================================
-        # NLP FEATURES
+        # FEATURES
         # =================================================
 
         st.subheader("NLP Features")
 
         features_df = pd.DataFrame(
             features.items(),
-            columns=['Feature', 'Value']
+            columns=["Feature", "Value"]
         )
 
         st.dataframe(
             features_df,
             use_container_width=True
         )
-
-        st.markdown("<br>", unsafe_allow_html=True)
 
         # =================================================
         # EXPLAINABLE AI
@@ -666,7 +598,7 @@ if st.button(
                 "Review length is limited."
             )
 
-        if features['coherence'] == 1:
+        if coherence == 1:
 
             insights.append(
                 "Text coherence successfully detected."
@@ -682,41 +614,6 @@ if st.button(
 """,
                 unsafe_allow_html=True
             )
-
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # =================================================
-        # BUSINESS IMPACT
-        # =================================================
-
-        with st.container(border=True):
-
-            st.subheader(
-                "Executive Business Impact"
-            )
-
-            st.markdown("""
-### Strategic Value
-
-This module enables:
-
-- Product perception analytics
-- AI-driven moderation
-- Marketplace trust optimization
-- Product intelligence extraction
-- Customer sentiment analytics
-- Spam review reduction
-- Explainable AI for e-commerce
-
-### Enterprise Impact
-
-- Better customer trust
-- Improved recommendation systems
-- Reduced fraudulent reviews
-- Enhanced marketplace quality
-- AI-powered product analytics
-- Enterprise scalable architecture
-""")
 
     except Exception as e:
 
