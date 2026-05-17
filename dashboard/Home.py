@@ -117,8 +117,25 @@ p {
 ========================= */
 
 section[data-testid="stSidebar"] {
-    background-color: #FFFFFF;
-    border-right: 1px solid #E2E8F0;
+    background: linear-gradient(180deg, #0B1220 0%, #0F1B33 100%);
+    border-right: 1px solid #1E293B;
+}
+
+/* Texto del sidebar */
+section[data-testid="stSidebar"] * {
+    color: #E2E8F0 !important;
+}
+
+/* Títulos del sidebar */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #FFFFFF !important;
+}
+
+/* Divider */
+section[data-testid="stSidebar"] hr {
+    border-color: #1E3A8A;
 }
 
 /* =========================
@@ -238,7 +255,7 @@ try:
 
 except:
 
-    best_model = "Random Forest"
+    best_model = "xgboost"
     best_f1 = 0.882
 
 # =====================================================
