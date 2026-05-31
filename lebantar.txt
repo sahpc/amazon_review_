@@ -1,0 +1,148 @@
+4. Crear entorno virtual (RECOMENDADO)
+
+Abre terminal en VS Code:
+
+Windows
+python -m venv venv
+
+Activar:
+
+venv\Scripts\activate
+
+
+
+5. Instalar dependencias
+
+Con el entorno activado:
+
+pip install -r requirements.txt
+
+Esto instalará:
+
+pandas
+scikit-learn
+fastapi
+streamlit
+xgboost
+lightgbm
+catboost
+vaderSentiment
+etc.
+
+
+
+
+
+
+
+6. Entrenar modelos
+
+MUY IMPORTANTE.
+
+Primero debes entrenar los modelos.
+
+Ejecuta:
+
+python scripts/train_models.py
+
+Verás algo así:
+
+Cargando dataset...
+Limpiando datos...
+Generando features NLP...
+Entrenando logistic_regression...
+Entrenando random_forest...
+Entrenando xgboost...
+Entrenando lightgbm...
+Entrenando catboost...
+
+Al terminar se crearán:
+
+models/
+├── logistic_regression.pkl
+├── random_forest.pkl
+├── xgboost.pkl
+├── lightgbm.pkl
+├── catboost.pkl
+└── metrics.json
+
+
+
+
+
+
+
+
+
+
+
+
+7. Ejecutar FastAPI
+En otra terminal:
+uvicorn api.main:app --reload
+Si todo sale bien:
+Uvicorn running on http://127.0.0.1:8000
+
+8. Abrir documentación automática API
+FastAPI genera Swagger automáticamente.
+Abre:
+http://127.0.0.1:8000/docs
+Ahí puedes probar endpoints.
+
+9. Ejecutar Streamlit
+En otra terminal:
+streamlit run dashboard/app.py
+Se abrirá:
+http://localhost:8501
+
+10. Flujo completo
+Streamlit
+Envía reseña → API FastAPI → modelo ML → respuesta → dashboard
+
+Cómo probar
+Ejemplo
+Texto:
+This product is amazing. Excellent quality and flavor. I highly recommend it.
+Estrellas:
+5
+Modelo:
+lightgbm
+
+Posibles errores
+Error CatBoost / LightGBM
+Instala Visual C++ Build Tools.
+O prueba:
+pip install catboostpip install lightgbm
+
+Si sale error de imports
+Ejecuta desde la raíz del proyecto:
+NO desde:
+scripts/
+SÍ desde:
+amazon_review_intelligence_v2/
+
+Orden correcto SIEMPRE
+Terminal 1
+python scripts/train_models.py
+Terminal 2
+uvicorn api.main:app --reload
+Terminal 3
+streamlit run dashboard/app.py
+
+Qué hace cada archivo
+ArchivoFuncióntrain_models.pyentrena todos los modelosfeatures.pycrea features NLPpreprocessing.pylimpia datasetmain.pyAPI FastAPIapp.pydashboard Streamlit
+
+Recomendación importante
+Tu dataset es MUY grande.
+Si el entrenamiento tarda mucho:
+En train_models.py agrega:
+df = df.sample(50000)
+para pruebas rápidas.
+
+URLs importantes
+API
+http://127.0.0.1:8000
+Swagger
+http://127.0.0.1:8000/docs
+Dashboard
+http://localhost:8501
